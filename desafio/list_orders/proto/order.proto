@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package orderpb;
+
+option go_package = "orders-app/proto/orderpb";
+
+service OrderService {
+  rpc ListOrders (Empty) returns (OrderList) {}
+}
+
+message Empty {}
+
+message Order {
+  int32 id = 1;
+  string customer = 2;
+  double amount = 3;
+}
+
+message OrderList {
+  repeated Order orders = 1;
+}
