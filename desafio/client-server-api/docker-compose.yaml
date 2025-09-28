@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  server:
+    build: .
+    container_name: cotacao-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - cotacoes-data:/data
+
+volumes:
+  cotacoes-data:
