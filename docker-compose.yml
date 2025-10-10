@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - WEATHERAPI_KEY=${WEATHERAPI_KEY}
+      - VIACEP_BASE=${VIACEP_BASE:-https://viacep.com.br}
+      - WEATHERAPI_BASE=${WEATHERAPI_BASE:-https://api.weatherapi.com}
+      - PORT=8080
+    restart: unless-stopped
