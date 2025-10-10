@@ -1,0 +1,239 @@
+CEP Weather API — Cloud Run em Go
+
+API em Go (Golang) que recebe um CEP de 8 dígitos, identifica a cidade via ViaCEP
+ e retorna o clima atual dessa localidade utilizando a WeatherAPI
+.
+
+🚀 Funcionalidades
+
+Recebe um CEP (8 dígitos) no formato GET /weather?cep=<cep>
+
+Busca cidade e UF via ViaCEP
+
+Consulta a temperatura via WeatherAPI
+
+Retorna a resposta formatada em:
+
+Celsius (°C)
+
+Fahrenheit (°F)
+
+Kelvin (K)
+
+Códigos HTTP tratados:
+
+✅ 200 — Sucesso
+
+⚠️ 404 — CEP não encontrado
+
+❌ 422 — CEP inválido
+
+🧩 Estrutura do projeto
+cloudrun/
+├── cmd/
+│   └── api/
+│       └── main.go
+├── internal/
+│   ├── httpapi/
+│   │   └── server.go
+│   ├── providers/
+│   │   ├── viacep.go
+│   │   └── weatherapi.go
+│   └── util/
+│       └── convert.go
+├── tests/
+│   └── server_test.go
+├── Dockerfile
+├── docker-compose.yml
+├── Makefile
+├── go.mod
+└── README.md
+
+⚙️ Variáveis de ambiente
+
+Crie um arquivo .env com o conteúdo:
+
+WEATHERAPI_KEY=SUA_CHAVE_WEATHERAPI
+VIACEP_BASE=https://viacep.com.br
+WEATHERAPI_BASE=https://api.weatherapi.com
+PORT=8080
+
+🧰 Execução local
+🔹 Usando Go diretamente
+export WEATHERAPI_KEY="SUA_CHAVE_WEATHERAPI"
+go run ./cmd/api
+
+
+Servidor iniciará em:
+👉 http://localhost:8080
+
+🔹 Usando Docker Compose
+docker compose up --build
+
+
+Acesse:
+👉 http://localhost:8080
+
+🧪 Testes de API
+✅ Verificar se o servidor está rodando
+curl http://localhost:8080/healthz
+
+
+Resposta esperada:
+
+ok
+
+🌡️ Buscar temperatura por CEP válido
+curl "http://localhost:8080/weather?cep=05372100"
+
+
+Exemplo de resposta:
+
+{
+  "temp_C": 27.5,
+  "temp_F": 81.5,
+  "temp_K": 300.0
+}
+
+⚠️ CEP inválido
+curl -i "http://localhost:8080/weather?cep=010225"
+
+
+Resposta:
+
+HTTP/1.1 422 Unprocessable Entity
+invalid zipcode
+
+❌ CEP inexistente
+curl -i "http://localhost:8080/weather?cep=99999999"
+
+
+Resposta:
+
+HTTP/1.1 404 Not Found
+can not find zipcode
+
+🧱 Build com Makefile
+make build    # Gera binário local (bin/api)
+make run      # Executa localmente na porta 8080
+make test     # Roda testes automatizados
+
+
+☁️ Deploy no Google Cloud Run
+gcloud builds submit --tag gcr.io/$(gcloud config get-value project)/cloudrun
+gcloud run deploy cloudrun \
+  --image gcr.io/$(gcloud config get-value project)/cloudrun \
+  --platform managed \
+  --region southamerica-east1 \
+  --allow-unauthenticated \
+  --set-env-vars "WEATHERAPI_KEY=SUA_CHAVE_WEATHERAPI"
+
+📌 Endpoints
+Método	Rota	Descrição
+GET	/healthz	Checa status da aplicação
+GET	/weather?cep={CEP}	Retorna temperaturas (C/F/K)
+🧠 Exemplo completo de execução
+$ export WEATHERAPI_KEY="ec799e849f9744f2b9a203358251010"
+$ make run
+🚀 Iniciando servidor local na porta 8080...
+2025/10/08 🚀 Server running on :8080
+
+# Em outro terminal:
+curl "http://localhost:8080/weather?cep=01001000"
+
+
+Saída esperada:
+
+{
+  "temp_C": 28.5,
+  "temp_F": 83.3,
+  "temp_K": 301.5
+}
+
+
+Executar via cloudrun
+
+🚀 URL Pública do Serviço
+
+🌍 https://cloudrun-cep-403358086773.southamerica-east1.run.app
+
+🧩 Endpoints
+Método	Rota	Descrição
+GET	/healthz	Verifica se o serviço está ativo
+GET	/weather?cep={CEP}	Retorna temperatura em Celsius, Fahrenheit e Kelvin
+💡 Exemplos de Uso
+✅ 1️⃣ Health Check
+
+Verifica se a API está no ar:
+
+curl https://cloudrun-cep-403358086773.southamerica-east1.run.app/healthz
+
+
+Resposta esperada:
+
+ok
+
+🌡️ 2️⃣ Consulta de CEP válido
+
+Exemplo com o CEP da Sé (São Paulo):
+
+curl "https://cloudrun-cep-403358086773.southamerica-east1.run.app/weather?cep=01001000"
+
+
+Resposta esperada:
+
+{
+  "temp_C": 27.8,
+  "temp_F": 82.0,
+  "temp_K": 300.8
+}
+
+⚠️ 3️⃣ CEP inválido
+curl -i "https://cloudrun-cep-403358086773.southamerica-east1.run.app/weather?cep=123"
+
+
+Resposta:
+
+HTTP/2 422
+invalid zipcode
+
+❌ 4️⃣ CEP inexistente
+curl -i "https://cloudrun-cep-403358086773.southamerica-east1.run.app/weather?cep=99999999"
+
+
+Resposta:
+
+HTTP/2 404
+can not find zipcode
+
+
+🧱 Build e Deploy no Cloud Run
+1️⃣ Build da imagem
+gcloud builds submit . \
+  --tag gcr.io/mba-golang/cloudrun-cep \
+  --project=mba-golang
+
+2️⃣ Deploy no Cloud Run
+gcloud run deploy cloudrun-cep \
+  --image gcr.io/mba-golang/cloudrun-cep \
+  --platform managed \
+  --region southamerica-east1 \
+  --allow-unauthenticated \
+  --project=mba-golang \
+  --set-env-vars "WEATHERAPI_KEY=ec799e849f9744f2b9a203358251010,VIACEP_BASE=https://viacep.com.br,WEATHERAPI_BASE=https://api.weatherapi.com"
+
+🧠 Como funciona
+
+Recebe o CEP (/weather?cep=01001000)
+
+Usa a API ViaCEP para identificar a cidade e UF
+
+Consulta a WeatherAPI usando o nome da cidade
+
+Retorna as temperaturas convertidas:
+
+°C: temperatura original da API
+
+°F: C * 1.8 + 32
+
+K: C + 273

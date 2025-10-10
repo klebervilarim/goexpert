@@ -1,27 +1,14 @@
-# Etapa de build
-FROM golang:tip-20250209-alpine3.22
-WORKDIR /apphttps://hub.docker.com/layers/library/golang/1.24-alpine/images/sha256-3e347e3f7694d3a1db144f437bcd2674ad41726be54a3526538d476c7f0e1ce3
+FROM golang:1.24-alpine
 
-# Copia os arquivos de módulo e baixa as dependências para aproveitar o cache do Docker
+WORKDIR /app
+
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copia o restante do código-fonte
-COPY . .
+COPY main.go ./
 
-# Instala ferramentas, constrói e otimiza o binário
-RUN apk add --no-cache ca-certificates upx && \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o cloudrun . && \
-    upx --best --lzma cloudrun
+RUN go build -o loadtester main.go
 
-# Etapa final
-FROM gcr.io/distroless/static-debian12
-WORKDIR /app
+ENTRYPOINT ["./loadtester"]
+CMD []
 
-# Copia os certificados de autoridade da etapa de build para permitir chamadas HTTPS
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-
-# Copia o binário da aplicação
-COPY --from=builder /app/cloudrun .
-USER nonroot:nonroot
-ENTRYPOINT ["/app/cloudrun"]
