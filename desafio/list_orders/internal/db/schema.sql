@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    customer VARCHAR(100) NOT NULL,
+    amount NUMERIC(10,2) NOT NULL
+);

@@ -1,0 +1,19 @@
+### Criar order
+POST http://localhost:8081/order
+Content-Type: application/json
+
+{
+  "customer": "Alice",
+  "amount": 120.50
+}
+
+### Listar orders REST
+GET http://localhost:8081/order
+
+### Listar orders GraphQL
+POST http://localhost:8082/graphql
+Content-Type: application/json
+
+{
+  "query": "{ listOrders { id customer amount } }"
+}
