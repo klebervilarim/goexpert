@@ -118,6 +118,7 @@ make build    # Gera binário local (bin/api)
 make run      # Executa localmente na porta 8080
 make test     # Roda testes automatizados
 
+
 ☁️ Deploy no Google Cloud Run
 gcloud builds submit --tag gcr.io/$(gcloud config get-value project)/cloudrun
 gcloud run deploy cloudrun \
